@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { FaBars, FaTimes } from "react-icons/fa"; // Import icons from react-icons
+import { useNavigate } from "react-router-dom";
+
+import { FaBars, FaTimes } from "react-icons/fa";
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const sidebarRef = useRef(null);
+  const navigate = useNavigate();
+  const role = localStorage.getItem("role");
 
   const handleToggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -13,6 +17,10 @@ const Sidebar = () => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
       setIsOpen(false);
     }
+  };
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
   };
 
   useEffect(() => {
@@ -36,7 +44,6 @@ const Sidebar = () => {
         {isOpen ? <FaTimes /> : <FaBars />}
       </button>
 
-      {/* Sidebar */}
       <div
         className={`bg-gray-200 w-64 min-h-screen p-4 fixed top-0 left-0 transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
@@ -92,6 +99,19 @@ const Sidebar = () => {
               Thông Tin Cá Nhân
             </Link>
           </li>
+          {role && role === "admin" ? (
+            <li className="my-2">
+              <Link
+                to="/register"
+                className="block py-2 px-4 rounded hover:bg-gray-300 transition-colors"
+              >
+                Đăng kí
+              </Link>
+            </li>
+          ) : (
+            " "
+          )}
+
           <li className="my-2">
             {/* <Link
               onClick={handleToggleSidebar}
@@ -100,8 +120,11 @@ const Sidebar = () => {
             >
               Logout
             </Link> */}
-            <div className="block py-2 px-4 rounded hover:bg-gray-300 transition-colors">
-              logout
+            <div
+              className="block py-2 px-4 rounded hover:bg-gray-300 transition-colors cursor-pointer"
+              onClick={handleLogout}
+            >
+              Logout
             </div>
           </li>
         </ul>

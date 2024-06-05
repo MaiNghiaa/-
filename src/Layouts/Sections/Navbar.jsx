@@ -36,3 +36,13 @@
 // };
 
 // export default Navbar;
+
+import React from "react";
+
+export default function Navbar() {
+  return (
+    <div className="h-[50px] text-center py-3 bg-slate-500 text-[16px] text-[#ffffff]">
+      {localStorage.getItem("username")}
+    </div>
+  );
+}

@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+// import { AuthContext } from "../context/AuthContext";
 import { AiOutlineTwitter } from "react-icons/ai";
 import { BiLogoFacebook } from "react-icons/bi";
 
@@ -11,6 +11,8 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const [Auth, setAuth] = useState();
+
   // const { setAuth } = useContext(AuthContext);
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -21,16 +23,37 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3000/login", {
+      // Đăng nhập người dùng
+      const loginResponse = await axios.post("http://localhost:3000/login", {
         username,
         password,
       });
 
-      setIsLoggedIn(true);
-      localStorage.setItem("isLoggedIn", true);
-      localStorage.setItem("username", username);
-      localStorage.setItem("password", password);
-      navigate("/dashboard");
+      if (loginResponse.status === 200) {
+        // Lưu trạng thái đăng nhập
+        setIsLoggedIn(true);
+        localStorage.setItem("isLoggedIn", true);
+        localStorage.setItem("username", username);
+        localStorage.setItem("password", password);
+
+        // Kiểm tra vai trò của người dùng
+        const authResponse = await axios.post("http://localhost:3000/Auth", {
+          username: username,
+        });
+
+        if (authResponse.status === 200 && authResponse.data.length > 0) {
+          // Lưu thông tin vai trò vào context và localStorage
+          setAuth(authResponse.data[0]);
+          localStorage.setItem("role", authResponse.data[0].role);
+
+          // Điều hướng người dùng tới dashboard
+          navigate("/dashboard");
+        } else {
+          setError("Không thể xác thực vai trò người dùng");
+        }
+      } else {
+        setError("Username hoặc password không đúng");
+      }
     } catch (err) {
       setError("Username hoặc password không đúng");
     }

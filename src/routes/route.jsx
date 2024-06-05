@@ -24,6 +24,7 @@ import Welcome from "../Pages/Welcome";
 //Edit
 import EditType from "../Components/Type/EditType";
 import EditRom from "../Components/ROM/EditRom";
+import Register from "../Pages/Register";
 //End Edit
 
 //Form Add
@@ -52,6 +53,14 @@ function Router() {
       element: (
         <Suspense fallback={<p className="suspense_loading">Loading...</p>}>
           <Welcome />
+        </Suspense>
+      ),
+    },
+    {
+      path: "/register",
+      element: (
+        <Suspense fallback={<p className="suspense_loading">Loading...</p>}>
+          <Register />
         </Suspense>
       ),
     },
