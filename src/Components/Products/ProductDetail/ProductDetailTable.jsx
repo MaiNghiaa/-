@@ -35,14 +35,11 @@ const ProductDetailTable = ({ productId, onClose }) => {
   };
 
   const handleAddNew = () => {
+    console.log(isOpenAddForm);
+
     setIsOpenAddForm(true);
     setonClickButtonAddnew(true);
   };
-  const handleCloseAddNew = () => {
-    setIsOpenAddForm(false);
-    setonClickButtonAddnew(false);
-  };
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75">
       <div className="bg-white p-4 rounded shadow-lg">
@@ -157,7 +154,7 @@ const ProductDetailTable = ({ productId, onClose }) => {
             <AddProductDetailTable
               productId={productId}
               onUpdate={handleUpdateProductDetail}
-              onClose={() => setIsOpenAddForm(false)}
+              onClose={() => setIsOpenFormEdit(false)}
             />
           )}
         </table>
