@@ -11,6 +11,7 @@ import ProductDetailTable from "../Components/Products/ProductDetail/ProductDeta
 import ProductEditForm from "../Components/Products/ProductEditForm";
 import DescriptionPostTable from "../Components/Products/Posts/DescriptionPostTable/DescriptionPostTable";
 import ImageList from "../Components/Products/ImageTable/ImageList";
+import PricingModal from "../Components/PricingModal";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -20,8 +21,11 @@ const Products = () => {
   const [selectedProductImages, setselectedProductImages] = useState(false);
   const [ShowProductDetailTable, setShowProductDetailTable] = useState(false); // State để điều khiển hiển thị bảng chi tieest
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
+
   const [selectimagebyId, setselectimagebyId] = useState();
   const [DataProductbyId, setDataProductbyId] = useState();
+  const [totalProducts, setTotalProducts] = useState();
 
   const navigate = useNavigate();
 
@@ -37,12 +41,20 @@ const Products = () => {
       .get("http://localhost:3000/Products")
       .then((response) => {
         setProducts(response.data);
+        localStorage.setItem("productCount", response.data.length);
       })
       .catch((error) => {
         console.error("There was an error fetching the products!", error);
       });
   };
+  const handleShowPricingModal = (productId) => {
+    setSelectedProductId(productId);
+    setShowPricingModal(true);
+  };
 
+  const handleClosePricingModal = () => {
+    setShowPricingModal(false);
+  };
   // Hàm xử lý khi cập nhật sản phẩm thành công
   const handleProductUpdateSuccess = () => {
     // Gọi API để lấy danh sách sản phẩm mới
@@ -97,7 +109,9 @@ const Products = () => {
   };
   useEffect(() => {
     fetchProducts();
+    // console.log(products);
   }, []);
+
   return (
     <div>
       <Navbar />
@@ -247,9 +261,8 @@ const Products = () => {
                         </button>
                         <button
                           className="select-none rounded-lg bg-green-500 py-1 px-2 text-center align-middle font-sans text-xs font-bold uppercase text-white shadow-md transition-all hover:shadow-lg"
-                          type="button"
                           onClick={() =>
-                            handleShowDescPostTable(product.ProductID)
+                            handleShowPricingModal(product.ProductID)
                           }
                         >
                           Số lượng
@@ -292,6 +305,12 @@ const Products = () => {
         <ImageList
           productId={selectimagebyId}
           onClose={() => setselectedProductImages(false)}
+        />
+      )}
+      {showPricingModal && (
+        <PricingModal
+          productId={selectedProductId}
+          onClose={handleClosePricingModal}
         />
       )}
     </div>
