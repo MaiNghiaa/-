@@ -62,6 +62,15 @@ const Sidebar = () => {
               Sản Phẩm
             </Link>
           </li>
+          {/* <li className="my-2">
+            <Link
+              onClick={handleToggleSidebar}
+              to="/Workshop"
+              className="block py-2 px-4 rounded hover:bg-gray-300 transition-colors"
+            >
+              Chương trình Workshop
+            </Link>
+          </li> */}
           <li className="my-2">
             <Link
               onClick={handleToggleSidebar}

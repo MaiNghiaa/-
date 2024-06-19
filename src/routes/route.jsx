@@ -40,7 +40,7 @@ const ROMs = lazy(() => import("../Pages/ROMs"));
 const Types = lazy(() => import("../Pages/Types"));
 const Profile = lazy(() => import("../Pages/Profile"));
 const Colors = lazy(() => import("../Pages/Colors"));
-
+const Workshop = lazy(() => import("../Pages/Workshop"));
 export const normalRoutes = [PATH_HOME];
 export const authRoutes = [];
 
@@ -69,6 +69,14 @@ function Router() {
       element: (
         <Suspense fallback={<p className="suspense_loading">Loading...</p>}>
           <Welcome />
+        </Suspense>
+      ),
+    },
+    {
+      path: PATH_WELCOME,
+      element: (
+        <Suspense fallback={<p className="suspense_loading">Loading...</p>}>
+          <Workshop />
         </Suspense>
       ),
     },
