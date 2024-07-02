@@ -89,6 +89,15 @@ const Sidebar = () => {
               Loại Type
             </Link>
           </li>
+          <li className="my-2">
+            <Link
+              onClick={handleToggleSidebar}
+              to="/Workshopadmin"
+              className="block py-2 px-4 rounded hover:bg-gray-300 transition-colors"
+            >
+              Workshops
+            </Link>
+          </li>
 
           <li className="my-2">
             <Link

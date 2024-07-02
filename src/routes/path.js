@@ -20,9 +20,9 @@ export const PATH_ROMS = "/Roms";
 export const PATH_ADD_ROMS = "/Roms/add";
 export const PATH_EDIT_ROMS = "/Roms/edit";
 
-export const PATH_WORKSHOP = "/Workshop";
-export const PATH_ADD_WORKSHOP = "/Workshop/add";
-export const PATH_EDIT_WORKSHOP = "/Workshop/edit";
+export const PATH_WORKSHOP = "/Workshopadmin";
+// export const PATH_ADD_WORKSHOP = "/Workshop/add";
+// export const PATH_EDIT_WORKSHOP = "/Workshop/edit";
 
 export const PATH_LOGIN = "/Login";
 export const PATH_WELCOME = "/";

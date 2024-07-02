@@ -1,24 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatCash } from "../Utils/Utils";
 
 import Sidebar from "../Layouts/Sections/Sidebar";
 import Navbar from "../Layouts/Sections/Navbar";
 import axios from "axios";
-
+import emaijs from "@emailjs/browser";
 const Dashboard = () => {
   const navigate = useNavigate();
   const username = localStorage.getItem("username");
   const [productCount, setProductCount] = useState(0);
   const [orderCount, setOrderCount] = useState(0);
-  const [dataOrders, setdataOrders] = useState();
+  const [dataOrders, setdataOrders] = useState([]);
   const [selectedOrderDetail, setSelectedOrderDetail] = useState(null);
-  const [IsopenStatusForm, setIsopenStatusForm] = useState(false);
+  const [isOpenStatusForm, setIsOpenStatusForm] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
-  const [namestatus, setnamestatus] = useState();
-
+  const [EmailCustomer, setEmailcustomer] = useState();
+  const [nameStatus, setNameStatus] = useState("Xử lý");
+  const [totalPrice, settotalPrice] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // Function to fetch products
+
+  const formRef = useRef(null);
+
   const fetchProducts = () => {
     axios
       .get("http://localhost:3000/Products")
@@ -31,17 +34,35 @@ const Dashboard = () => {
       });
   };
 
-  // Function to fetch orders
+  const form = document.createElement("form");
+  form.style.display = "none";
+  document.body.appendChild(form);
+
   const fetchOrders = () => {
     axios
       .get("http://localhost:3000/orders")
       .then((response) => {
-        let count = 0;
-        if (response) {
-          count = response.data.length;
+        if (response.data) {
+          console.log(response.data);
+          const orders = response.data;
+          const count = orders.length;
+
+          const totalPrice = orders
+            .reduce((total, order) => {
+              if (order.status === "Thành công") {
+                return total + parseFloat(order.total_price);
+              } else {
+                return total;
+              }
+            }, 0)
+            .toString();
+
+          settotalPrice(totalPrice);
+          setOrderCount(count);
+          setdataOrders(orders);
+
+          console.log("Total price of successful orders:", totalPrice);
         }
-        setOrderCount(count);
-        setdataOrders(response.data);
       })
       .catch((error) => {
         console.error("There was an error fetching the orders!", error);
@@ -57,81 +78,100 @@ const Dashboard = () => {
       fetchOrders();
     }
   }, [navigate]);
-  const handleDetailClick = (products) => {
-    setSelectedOrderDetail(products);
+
+  const handleDetailClick = (order) => {
+    setSelectedOrderDetail(order);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setIsopenStatusForm(false);
-  };
-  const handleStatusClick = (order) => {
-    setSelectedStatus(order);
-    setIsopenStatusForm(true);
+    setIsOpenStatusForm(false);
   };
 
-  const handleStatusChange = () => {
-    // console.log(selectedStatus);
-    // Gửi request API để cập nhật trạng thái của đơn hàng
+  const handleStatusClick = (order, email_customer) => {
+    setSelectedOrderDetail(order);
+    setSelectedStatus(order);
+    setIsOpenStatusForm(true);
+  };
+  console.log(selectedOrderDetail);
+
+  const handleStatusChange = (noti) => {
+    console.log(noti);
     axios
       .post("http://localhost:3000/update-order-status", {
         order: selectedStatus,
-        status: namestatus,
+        status: noti,
       })
       .then((response) => {
         console.log("Update order status successfully:", response.data);
-        // Cập nhật lại trạng thái của đơn hàng trong state dataOrders
         const updatedOrders = dataOrders.map((order) => {
-          if (order.orderId === selectedOrderDetail.orderId) {
+          if (order.order_id === selectedOrderDetail.order_id) {
             return {
               ...order,
             };
           }
           return order;
         });
-        setSelectedStatus(false);
         setdataOrders(updatedOrders);
-        closeModal(); // Đóng modal sau khi cập nhật thành công
+        setIsOpenStatusForm(false);
+
+        // const formData = new FormData(form);
+        // console.log(EmailCustomer, noti);
+        // formData.append("emailfrom", EmailCustomer);
+        // formData.append("status", noti);
+        // console.log(formData);
+        // emaijs.sendForm(
+        //   "service_htasj2f",
+        //   "template_qc34e4s",
+        //   formData,
+        //   "RJYgH5x8Gi6zb8-vN"
+        // );
+        closeModal();
       })
       .catch((error) => {
         console.error("Error updating order status:", error);
+        // const formData = new FormData(form);
+        // formData.append("emailfrom", EmailCustomer);
+        // formData.append("status", noti);
+        // console.log(formData);
+        // emaijs.sendForm(
+        //   "service_htasj2f",
+        //   "template_qc34e4s",
+        //   formData,
+        //   "RJYgH5x8Gi6zb8-vN"
+        // );
       });
   };
-
-  console.log(dataOrders);
   return (
-    <div>
-      {" "}
+    <div className="min-h-screen bg-gray-100">
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <div className="w-full max-w-[1200px] px-[12px] mx-auto ">
-          <div className="mt-6 flex gap-10 justify-around ">
-            <div className=" relative flex flex-row items-center justify-center bg-slate-300  h-[250px] flex-1">
+        <div className="w-full max-w-[1200px] px-4 mx-auto">
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="relative flex items-center justify-center bg-blue-500 text-white h-[150px] sm:h-[200px] lg:h-[250px] rounded-lg shadow-md">
               <div className="flex flex-col justify-center items-center">
-                <h2 className="text-[16px] text-gray-700">Số đơn hàng</h2>
-                <p className="mt-3 text-[20px] text-gray-500">
-                  {orderCount && orderCount}
-                </p>
+                <h2 className="text-[16px]">Số đơn hàng</h2>
+                <p className="mt-3 text-[20px]">{orderCount}</p>
               </div>
             </div>
-            <div className=" relative flex flex-row items-center justify-center bg-slate-300  h-[250px] flex-1">
+            <div className="relative flex items-center justify-center bg-green-500 text-white h-[150px] sm:h-[200px] lg:h-[250px] rounded-lg shadow-md">
               <div className="flex flex-col justify-center items-center">
-                <h2 className="text-[16px] text-gray-700">Số sản phẩm có</h2>
-                <p className="mt-3 text-[20px] text-gray-500">
-                  {productCount && productCount}
-                </p>
+                <h2 className="text-[16px]">Số sản phẩm có</h2>
+                <p className="mt-3 text-[20px]">{productCount}</p>
               </div>
             </div>
-            <div className=" relative flex flex-row items-center justify-center bg-slate-300  h-[250px] flex-1">
+            <div className="relative flex items-center justify-center bg-purple-500 text-white h-[150px] sm:h-[200px] lg:h-[250px] rounded-lg shadow-md">
               <div className="flex flex-col justify-center items-center">
-                <h2 className="text-[16px] text-gray-700">Số tiền thu</h2>
-                <p className="mt-3 text-[20px] text-gray-500">0</p>
+                <h2 className="text-[16px]">Số tiền thu</h2>
+                <p className="mt-3 text-[20px]">
+                  {formatCash(totalPrice) + "đ"}
+                </p>
               </div>
             </div>
           </div>
-          <div className="mt-5 bg-blue-200 orders">
+          <div className="mt-5 bg-white p-4 rounded-lg shadow-md">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -177,16 +217,18 @@ const Dashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {order.status}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap flex space-x-2">
                         <button
                           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                          onClick={() => handleDetailClick(order.products)}
+                          onClick={() => handleDetailClick(order)}
                         >
                           Chi tiết
                         </button>
                         <button
-                          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-1"
-                          onClick={() => handleStatusClick(order)}
+                          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                          onClick={() =>
+                            handleStatusClick(order, order.customer_email)
+                          }
                         >
                           Trạng thái
                         </button>
@@ -197,12 +239,12 @@ const Dashboard = () => {
             </table>
             {isModalOpen && (
               <div className="fixed inset-0 overflow-y-auto z-50 flex justify-center items-center bg-black bg-opacity-50">
-                <div className="bg-white rounded-lg overflow-hidden shadow-xl max-w-3xl">
+                <div className="bg-white rounded-lg overflow-hidden shadow-xl max-w-3xl w-full">
                   <div className="p-6">
                     <h2 className="text-xl font-bold mb-4">
                       Chi tiết đơn hàng
                     </h2>
-                    <table className="table-auto border-collapse border border-gray-400">
+                    <table className="table-auto border-collapse border border-gray-400 w-full">
                       <thead>
                         <tr className="bg-gray-200">
                           <th className="border border-gray-400 px-4 py-2">
@@ -221,10 +263,14 @@ const Dashboard = () => {
                       </thead>
                       <tbody>
                         {selectedOrderDetail &&
-                          selectedOrderDetail.map((product, index) => (
+                          selectedOrderDetail.products.map((product, index) => (
                             <tr
                               key={index}
-                              className={index % 2 === 0 ? "bg-gray-100" : ""}
+                              className={
+                                index % 2 === 0
+                                  ? "bg-gray-100 text-center"
+                                  : "text-center"
+                              }
                             >
                               <td className="border border-gray-400 px-4 py-2">
                                 <img
@@ -240,7 +286,8 @@ const Dashboard = () => {
                                 {product.quantity}
                               </td>
                               <td className="border border-gray-400 px-4 py-2">
-                                {product.price_per_item}
+                                {formatCash(product.price_per_item.toString()) +
+                                  "d"}
                               </td>
                             </tr>
                           ))}
@@ -248,8 +295,8 @@ const Dashboard = () => {
                     </table>
                     <div className="mt-4 flex justify-end">
                       <button
+                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                         onClick={closeModal}
-                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
                       >
                         Đóng
                       </button>
@@ -258,43 +305,90 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
-            {IsopenStatusForm && (
-              <div className="fixed z-10 inset-0 overflow-y-auto">
-                <div className="flex items-center justify-center min-h-screen px-4">
-                  <div
-                    className="fixed inset-0 transition-opacity"
-                    aria-hidden="true"
-                  >
-                    <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            {isOpenStatusForm && (
+              <div className="fixed inset-0 overflow-y-auto z-50 flex justify-center items-center bg-black bg-opacity-50">
+                <div className="bg-white rounded-lg overflow-hidden shadow-xl max-w-lg w-full p-6">
+                  <h2 className="text-xl font-bold mb-4">
+                    Cập nhật trạng thái
+                  </h2>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Trạng thái
+                    </label>
+                    <select
+                      value={nameStatus}
+                      onChange={(e) => setNameStatus(e.target.value)}
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                    >
+                      <option
+                        value="Xử lý"
+                        className={
+                          selectedOrderDetail &&
+                          selectedOrderDetail.status === "Xử lý"
+                            ? "visible hidden"
+                            : ""
+                        }
+                      >
+                        Đang xử lý
+                      </option>
+                      <option
+                        value="Xác nhận"
+                        className={
+                          selectedOrderDetail &&
+                          selectedOrderDetail.status === "Xác nhận"
+                            ? "visible hidden"
+                            : ""
+                        }
+                      >
+                        Xác nhận
+                      </option>
+                      <option
+                        value="Đang giao hàng"
+                        className={
+                          selectedOrderDetail &&
+                          selectedOrderDetail.status === "Đang giao hàng"
+                            ? "visible hidden"
+                            : ""
+                        }
+                      >
+                        Đang giao hàng
+                      </option>
+                      <option
+                        value="Thành công"
+                        className={
+                          selectedOrderDetail &&
+                          selectedOrderDetail.status === "Thành công"
+                            ? "visible hidden"
+                            : ""
+                        }
+                      >
+                        Thành công
+                      </option>
+                      <option
+                        value="Đã hủy"
+                        className={
+                          selectedOrderDetail &&
+                          selectedOrderDetail.status === "Đã hủy"
+                            ? "visible hidden"
+                            : ""
+                        }
+                      >
+                        Đã hủy
+                      </option>
+                    </select>
                   </div>
-
-                  <div className="relative bg-white rounded-lg p-8">
-                    <h2 className="text-lg font-semibold mb-4">
-                      Chọn trạng thái
-                    </h2>
+                  <div className="flex justify-end space-x-4">
                     <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
-                      onClick={() => {
-                        setnamestatus("Đang giao");
-                        handleStatusChange();
-                      }}
-                    >
-                      Đang giao
-                    </button>
-                    <button
-                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
-                      onClick={() => {
-                        setnamestatus("Thành công");
-                        handleStatusChange();
-                      }}
-                    >
-                      Thành công
-                    </button>
-                    <button
-                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                      className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                       onClick={closeModal}
                     >
-                      Đóng
+                      Hủy
+                    </button>
+                    <button
+                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                      onClick={() => handleStatusChange(nameStatus)}
+                    >
+                      Cập nhật
                     </button>
                   </div>
                 </div>
