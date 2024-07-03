@@ -43,6 +43,7 @@ const PricingModal = ({ productId, onClose }) => {
       .catch((error) => {
         console.error("Error fetching ROMs:", error);
       });
+    console.log(roms);
 
     axios
       .get("http://localhost:3000/Colors")
@@ -294,6 +295,7 @@ const PricingModal = ({ productId, onClose }) => {
                         </button>
                       </div>
                       <div className="bg-sky-100 p-4 rounded-lg">
+                        <p className="text-black"> dung luong ram</p>
                         <select
                           value={newData.Rom}
                           onChange={(e) =>
@@ -307,6 +309,8 @@ const PricingModal = ({ productId, onClose }) => {
                             </option>
                           ))}
                         </select>
+                        <p className="text-black"> Mau sac </p>
+
                         <select
                           value={newData.Color_name}
                           onChange={(e) =>
@@ -323,6 +327,8 @@ const PricingModal = ({ productId, onClose }) => {
                             </option>
                           ))}
                         </select>
+                        <p className="text-black"> so luowng</p>
+
                         <input
                           type="number"
                           placeholder="Số lượng"
@@ -334,6 +340,8 @@ const PricingModal = ({ productId, onClose }) => {
                             })
                           }
                         />
+                        <p className="text-black"> Gias</p>
+
                         <input
                           type="number"
                           placeholder="Giá"
@@ -345,6 +353,8 @@ const PricingModal = ({ productId, onClose }) => {
                             })
                           }
                         />
+                        <p className="text-black"> Gia cu</p>
+
                         <input
                           type="number"
                           placeholder="Giá cũ"

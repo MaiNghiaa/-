@@ -35,7 +35,7 @@ const ProductEditForm = ({
       });
     }
   }, [ProductById]);
-  console.log(ProductById);
+  // console.log(ProductById);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct({ ...product, [name]: value });

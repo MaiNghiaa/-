@@ -164,7 +164,7 @@ const Products = () => {
                   <td className="py-3 px-4 border-b border-gray-300 text-center">
                     <img
                       src={`http://localhost:3000/assets/${product.image_caption_URL}`}
-                      alt={product.product_name}
+                      alt={product.type_name}
                       className="w-16 h-16 object-cover rounded-md"
                     />
                     <button
@@ -180,7 +180,7 @@ const Products = () => {
                     {product.product_name}
                   </td>
                   <td className="py-3 px-4 border-b border-gray-300">
-                    {replaceSpecialCharacters(product.type_name)}
+                    {product.type_name}
                   </td>
                   <td className="py-3 px-4 border-b border-gray-300">
                     {formatCash(product.MaxCaptionPrice)}vnđ
